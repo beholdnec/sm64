@@ -1,7 +1,10 @@
 #ifndef _HARDWARE_H_
 #define _HARDWARE_H_
 
+#ifdef __EMSCRIPTEN__
+#else
 #define HW_REG(reg, type) *(volatile type *)(uintptr_t)(reg | 0xa0000000)
+#endif
 
 #define AI_DRAM_ADDR_REG 0x04500000
 #define AI_LEN_REG 0x04500004

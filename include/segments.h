@@ -1,6 +1,12 @@
 #ifndef _SEGMENTS_H
 #define _SEGMENTS_H
 
+#ifdef __EMSCRIPTEN__
+
+#define SEG_POOL_SIZE (4*1024*1024)
+
+#else
+
 /*
  * Memory addresses for segments. Ideally, this header file would not be
  * needed, and the addresses would be defined in sm64.ld and linker-inserted
@@ -50,5 +56,7 @@
 #define SEG_POOL_END_4MB 0x80400000 // For the error message screen enhancement.
 #define SEG_GODDARD      SEG_POOL_START + 0x113000
 #endif
+
+#endif // __EMSCRIPTEN__
 
 #endif // _SEGMENTS_H

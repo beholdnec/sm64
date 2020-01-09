@@ -1,3 +1,7 @@
+#ifdef __EMSCRIPTEN__
+#include <stdlib.h>
+#endif
+
 #include <ultra64.h>
 #include <stdio.h>
 
@@ -122,8 +126,15 @@ void setup_mesg_queues(void) {
 }
 
 void AllocPool(void) {
+#ifdef __EMSCRIPTEN__
+    printf("allocating main pool, size 0x%X\n", SEG_POOL_SIZE);
+    u8 *start = aligned_alloc(256, SEG_POOL_SIZE);
+    u8 *end = start + SEG_POOL_SIZE;
+    printf("allocated main pool at %p\n", start);
+#else
     void *start = (void *) SEG_POOL_START;
     void *end = (void *) SEG_POOL_END;
+#endif
 
     main_pool_init(start, end);
     gEffectsMemoryPool = mem_pool_init(0x4000, MEMORY_POOL_LEFT);
@@ -191,6 +202,7 @@ void interrupt_gfx_sptask(void) {
 }
 
 void start_gfx_sptask(void) {
+    // printf("start_gfx_sptask\n");
     if (gActiveSPTask == NULL && sCurrentDisplaySPTask != NULL
         && sCurrentDisplaySPTask->state == SPTASK_STATE_NOT_STARTED) {
         profiler_log_gfx_time(TASKS_QUEUED);
@@ -297,6 +309,7 @@ void handle_sp_complete(void) {
 }
 
 void handle_dp_complete(void) {
+    // printf("handle_dp_complete\n");
     // Gfx SP task is completely done.
     if (sCurrentDisplaySPTask->msgqueue != NULL) {
         osSendMesg(sCurrentDisplaySPTask->msgqueue, sCurrentDisplaySPTask->msg, OS_MESG_NOBLOCK);
@@ -373,6 +386,7 @@ void send_display_list(struct SPTask *spTask) {
         osWritebackDCacheAll();
         spTask->state = SPTASK_STATE_NOT_STARTED;
         if (sCurrentDisplaySPTask == NULL) {
+            // printf("sending new display task...\n");
             sCurrentDisplaySPTask = spTask;
             sNextDisplaySPTask = NULL;
             osSendMesg(&gIntrMesgQueue, (OSMesg) MESG_START_GFX_SPTASK, OS_MESG_NOBLOCK);

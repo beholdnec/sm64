@@ -1,3 +1,7 @@
+#ifdef __EMSCRIPTEN__
+#include <stdio.h>
+#endif
+
 #include <ultra64.h>
 
 #include "sm64.h"
@@ -656,13 +660,15 @@ static void geo_process_shadow(struct GraphNodeShadow *node) {
                 if (geo != NULL && geo->type == GRAPH_NODE_TYPE_SCALE) {
                     objScale = ((struct GraphNodeScale *) geo)->scale;
                 }
+                s32 animIndex = retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute);
                 animOffset[0] =
-                    gCurAnimData[retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute)]
+                    gCurAnimData[animIndex]
                     * gCurAnimTranslationMultiplier * objScale;
                 animOffset[1] = 0.0f;
                 gCurrAnimAttribute += 2;
+                animIndex = retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute);
                 animOffset[2] =
-                    gCurAnimData[retrieve_animation_index(gCurrAnimFrame, &gCurrAnimAttribute)]
+                    gCurAnimData[animIndex]
                     * gCurAnimTranslationMultiplier * objScale;
                 gCurrAnimAttribute -= 6;
 

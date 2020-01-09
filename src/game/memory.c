@@ -1,3 +1,10 @@
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#endif
+
 #include <ultra64.h>
 
 #include "sm64.h"
@@ -10,8 +17,11 @@
 #include "segments.h"
 #include "memory.h"
 
+#ifdef __EMSCRIPTEN__
+#else
 extern u8 _engineSegmentRomStart[];
 extern u8 _engineSegmentRomEnd[];
+#endif
 extern u8 gDecompressionHeap[];
 
 // round up to the next multiple
@@ -42,12 +52,15 @@ struct MemoryBlock {
     u32 size;
 };
 
+#ifdef __EMSCRIPTEN__
+#else
 extern uintptr_t sSegmentTable[32];
 extern u32 sPoolFreeSpace;
 extern u8 *sPoolStart;
 extern u8 *sPoolEnd;
 extern struct MainPoolBlock *sPoolListHeadL;
 extern struct MainPoolBlock *sPoolListHeadR;
+#endif
 
 
 /**
@@ -67,32 +80,52 @@ struct MainPoolBlock *sPoolListHeadR;
 static struct MainPoolState *gMainPoolState = NULL;
 
 uintptr_t set_segment_base_addr(s32 segment, void *addr) {
+#ifdef __EMSCRIPTEN__
+    return addr;
+#else
     sSegmentTable[segment] = (uintptr_t) addr & 0x1FFFFFFF;
     return sSegmentTable[segment];
+#endif
 }
 
 void *get_segment_base_addr(s32 segment) {
+#ifdef __EMSCRIPTEN__
+    return 0;
+#else
     return (void *) (sSegmentTable[segment] | 0x80000000);
+#endif
 }
 
 void *segmented_to_virtual(const void *addr) {
+#ifdef __EMSCRIPTEN__
+    return addr;
+#else
     size_t segment = (uintptr_t) addr >> 24;
     size_t offset = (uintptr_t) addr & 0x00FFFFFF;
 
     return (void *) ((sSegmentTable[segment] + offset) | 0x80000000);
+#endif
 }
 
-void *virtual_to_segmented(u32 segment, const void *addr) {
+void *virtual_to_segmented(u32 segment, void *addr) {
+#ifdef __EMSCRIPTEN__
+    return addr;
+#else
     size_t offset = ((uintptr_t) addr & 0x1FFFFFFF) - sSegmentTable[segment];
 
     return (void *) ((segment << 24) + offset);
+#endif
 }
 
 void move_segment_table_to_dmem(void) {
+#ifdef __EMSCRIPTEN__
+    // TODO (probably unnecessary)
+#else
     s32 i;
 
     for (i = 0; i < 16; i++)
         gMoveWd(gDisplayListHead++, 6, i * 4, sSegmentTable[i]);
+#endif
 }
 
 /**
@@ -101,6 +134,7 @@ void move_segment_table_to_dmem(void) {
  * freeing the object that was most recently allocated from a side.
  */
 void main_pool_init(void *start, void *end) {
+    printf("initializing main pool at %p, %p\n", start, end);
     sPoolStart = (u8 *) ALIGN16((uintptr_t) start) + 16;
     sPoolEnd = (u8 *) ALIGN16((uintptr_t) end - 15) - 16;
     sPoolFreeSpace = sPoolEnd - sPoolStart;
@@ -141,6 +175,7 @@ void *main_pool_alloc(u32 size, u32 side) {
             addr = (u8 *) sPoolListHeadR + 16;
         }
     }
+    //printf("allocated object in main pool at %p\n", addr);
     return addr;
 }
 
@@ -150,6 +185,7 @@ void *main_pool_alloc(u32 size, u32 side) {
  * Return the amount of free space left in the pool.
  */
 u32 main_pool_free(void *addr) {
+    // printf("freeing address %p\n", addr);
     struct MainPoolBlock *block = (struct MainPoolBlock *) ((u8 *) addr - 16);
     struct MainPoolBlock *oldListHead = (struct MainPoolBlock *) ((u8 *) addr - 16);
 
@@ -233,6 +269,17 @@ u32 main_pool_pop_state(void) {
 static void dma_read(u8 *dest, u8 *srcStart, u8 *srcEnd) {
     u32 size = ALIGN16(srcEnd - srcStart);
 
+#ifdef __EMSCRIPTEN__
+    if (!dest || !srcStart) {
+        printf("Invalid dma_read dest %p, srcStart %p, size 0x%u\n", dest, srcStart, size);
+        EM_ASM(
+            console.warn("Invalid dma_read. Stack:");
+            console.warn(new Error().stack);
+        );
+        return;
+    }
+    memcpy(dest, srcStart, size);
+#else
     osInvalDCache(dest, size);
     while (size != 0) {
         u32 copySize = (size >= 0x1000) ? 0x1000 : size;
@@ -245,6 +292,7 @@ static void dma_read(u8 *dest, u8 *srcStart, u8 *srcEnd) {
         srcStart += copySize;
         size -= copySize;
     }
+#endif
 }
 
 /**
@@ -346,6 +394,8 @@ void *func_80278304(u32 segment, u8 *srcStart, u8 *srcEnd) {
 }
 
 void load_engine_code_segment(void) {
+#ifdef __EMSCRIPTEN__
+#else
     void *startAddr = (void *) SEG_ENGINE;
     u32 totalSize = SEG_FRAMEBUFFERS - SEG_ENGINE;
     UNUSED u32 alignedSize = ALIGN16(_engineSegmentRomEnd - _engineSegmentRomStart);
@@ -355,6 +405,7 @@ void load_engine_code_segment(void) {
     dma_read(startAddr, _engineSegmentRomStart, _engineSegmentRomEnd);
     osInvalICache(startAddr, totalSize);
     osInvalDCache(startAddr, totalSize);
+#endif
 }
 
 /**

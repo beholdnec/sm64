@@ -155,6 +155,8 @@ int mio0_decode(const unsigned char *in, unsigned char *out, unsigned int *end)
    int uncomp_idx = 0;
    int valid;
 
+   printf("mio0_decode in %p, out %p\n", in, out);
+
    // extract header
    valid = mio0_decode_header(in, &head);
    // verify MIO0 header

@@ -95,8 +95,11 @@ s8 gSoundMode;
 s8 gAudioUpdatesPerFrame;
 #endif
 
+#ifdef __EMSCRIPTEN__
+#else
 extern u64 gAudioGlobalsStartMarker;
 extern u64 gAudioGlobalsEndMarker;
+#endif
 
 extern u8 gSoundDataADSR[]; // sound_data.ctl
 extern u8 gSoundDataRaw[];  // sound_data.tbl
@@ -451,6 +454,9 @@ void patch_sound(UNUSED struct AudioBankSound *sound, UNUSED u8 *memBase, UNUSED
 
 // on US/JP this inlines patch_sound, using some -sopt compiler flag
 void patch_audio_bank(struct AudioBank *mem, u8 *offset, u32 numInstruments, u32 numDrums) {
+#ifdef __EMSCRIPTEN__
+    return; // FIXME
+#endif
     struct Instrument *instrument;
     struct Instrument **itInstrs;
     struct Instrument **end;
@@ -556,6 +562,9 @@ l2:
 }
 
 struct AudioBank *bank_load_immediate(s32 bankId, s32 arg1) {
+#ifdef __EMSCRIPTEN__
+    return NULL;
+#endif
     UNUSED u32 pad1[4];
     u32 buf[4];
     u32 numInstruments, numDrums;
@@ -773,6 +782,9 @@ struct AudioBank *load_banks_immediate(s32 seqId, u8 *arg1) {
 }
 
 void preload_sequence(u32 seqId, u8 preloadMask) {
+#ifdef __EMSCRIPTEN
+    return;
+#endif
     void *sequenceData;
     u8 temp;
 
@@ -870,6 +882,9 @@ void load_sequence_internal(u32 player, u32 seqId, s32 loadAsync) {
 }
 
 void audio_init() {
+#ifdef __EMSCRIPTEN__
+    return;
+#else
 #ifdef VERSION_EU
     UNUSED s8 pad[16];
 #else
@@ -1004,5 +1019,6 @@ void audio_init() {
 
     init_sequence_players();
     gAudioLoadLock = AUDIO_LOCK_NOT_LOADING;
+#endif
 }
 

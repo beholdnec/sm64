@@ -21,9 +21,13 @@ s32 osAiSetFrequency(u32 freq) {
         a2 = 16;
     }
 
+#ifdef __EMSCRIPTEN__
+    // TODO
+#else
     HW_REG(AI_DACRATE_REG, u32) = a1 - 1;
     HW_REG(AI_BITRATE_REG, u32) = a2 - 1;
     HW_REG(AI_CONTROL_REG, u32) = 1; // enable dma
+#endif
     return D_8033491C / (s32) a1;
 }
 

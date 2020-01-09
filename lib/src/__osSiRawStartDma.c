@@ -2,6 +2,9 @@
 #include "hardware.h"
 
 s32 __osSiRawStartDma(s32 dir, void *addr) {
+#ifdef __EMSCRIPTEN__
+    return 0; // TODO
+#else
     if (__osSiDeviceBusy()) {
         return -1;
     }
@@ -22,4 +25,5 @@ s32 __osSiRawStartDma(s32 dir, void *addr) {
         osInvalDCache(addr, 64);
     }
     return 0;
+#endif
 }

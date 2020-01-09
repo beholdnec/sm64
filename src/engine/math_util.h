@@ -43,7 +43,7 @@ void *vec3f_to_vec3s(Vec3s dest, Vec3f a);
 void *find_vector_perpendicular_to_plane(Vec3f dest, Vec3f a, Vec3f b, Vec3f c);
 void *vec3f_cross(Vec3f dest, Vec3f a, Vec3f b);
 void *vec3f_normalize(Vec3f dest);
-void mtxf_copy(f32 dest[4][4], f32 src[4][4]);
+void mtxf_copy(f32 dest[4][4], const f32 src[4][4]);
 void mtxf_identity(f32 mtx[4][4]);
 void mtxf_translate(f32 a[4][4], Vec3f b);
 void mtxf_lookat(f32 mtx[4][4], Vec3f b, Vec3f c, s16 d);

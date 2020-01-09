@@ -2,6 +2,9 @@
 #include <macros.h>
 #include <stdarg.h>
 #include <stdio.h>
+#ifdef __EMSCRIPTEN__
+#include <string.h>
+#endif
 
 #ifndef VERSION_EU
 #include "prevent_bss_reordering.h"
@@ -3619,6 +3622,9 @@ void Unknown801A6E44(UNUSED u32 a0) {
 void gd_block_dma(u32 devAddr, void *vAddr, s32 size) {
     s32 transfer; // 2c
 
+#ifdef __EMSCRIPTEN__
+    memcpy(vAddr, (const void*)devAddr, size);
+#else
     do {
         if ((transfer = size) > 0x1000) {
             transfer = 0x1000;
@@ -3630,6 +3636,7 @@ void gd_block_dma(u32 devAddr, void *vAddr, s32 size) {
         vAddr = (void *) ((uintptr_t) vAddr + transfer);
         size -= 0x1000;
     } while (size > 0);
+#endif
 }
 
 /* 255704 -> 255988 */

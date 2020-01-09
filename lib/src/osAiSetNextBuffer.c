@@ -34,7 +34,11 @@ s32 osAiSetNextBuffer(void *buff, u32 len) {
         return -1;
     }
 
+#ifdef __EMSCRIPTEN__
+    // TODO
+#else
     HW_REG(AI_DRAM_ADDR_REG, void *) = (void *) osVirtualToPhysical(sp1c);
     HW_REG(AI_LEN_REG, u32) = len;
+#endif
     return 0;
 }

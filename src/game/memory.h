@@ -5,7 +5,6 @@
 #define MEMORY_POOL_LEFT  0
 #define MEMORY_POOL_RIGHT 1
 
-
 struct AllocOnlyPool
 {
     s32 totalSpace;
@@ -26,7 +25,7 @@ extern struct MemoryPool *gEffectsMemoryPool;
 uintptr_t set_segment_base_addr(s32 segment, void *addr);
 void *get_segment_base_addr(s32 segment);
 void *segmented_to_virtual(const void *addr);
-void *virtual_to_segmented(u32 segment, const void *addr);
+void *virtual_to_segmented(u32 segment, void *addr);
 void move_segment_table_to_dmem(void);
 
 void main_pool_init(void *start, void *end);

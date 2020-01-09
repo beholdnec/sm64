@@ -49,6 +49,9 @@ void osSpTaskLoad(OSTask *task) {
         ;
     }
 }
+
+#ifdef __EMSCRIPTEN__
+#else
 void osSpTaskStartGo(UNUSED OSTask *task) {
     while (__osSpDeviceBusy()) {
         ;
@@ -56,3 +59,4 @@ void osSpTaskStartGo(UNUSED OSTask *task) {
     __osSpSetStatus(SPSTATUS_SET_INTR_ON_BREAK | SPSTATUS_CLEAR_SSTEP | SPSTATUS_CLEAR_BROKE
                     | SPSTATUS_CLEAR_HALT);
 }
+#endif

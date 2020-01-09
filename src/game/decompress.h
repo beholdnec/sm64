@@ -3,6 +3,6 @@
 
 #include "types.h"
 
-extern void decompress(void *, void *);
+extern void decompress(const void *compressed, void *dst);
 
 #endif /* _DECOMPRESS_H */

@@ -26,6 +26,9 @@ s32 osPiStartDma(OSIoMesg *mb, s32 priority, s32 direction, uintptr_t devAddr, v
     mb->piHandle = NULL;
 #endif
 
+#ifdef __EMSCRIPTEN__
+    result = osSendMesg(mq, mb, OS_MESG_NOBLOCK);
+#else
     if (priority == OS_MESG_PRI_HIGH) {
         cmdQueue = osPiGetCmdQueue();
         result = osJamMesg(cmdQueue, mb, OS_MESG_NOBLOCK);
@@ -33,5 +36,6 @@ s32 osPiStartDma(OSIoMesg *mb, s32 priority, s32 direction, uintptr_t devAddr, v
         cmdQueue = osPiGetCmdQueue();
         result = osSendMesg(cmdQueue, mb, OS_MESG_NOBLOCK);
     }
+#endif
     return result;
 }

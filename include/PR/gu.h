@@ -19,7 +19,7 @@ void guScale(Mtx *m, float x, float y, float z);
 void guMtxF2L(float mf[4][4], Mtx *m);
 void guMtxIdent(Mtx *m);
 void guMtxIdentF(float mf[4][4]);
-void guMtxL2F(float mf[4][4], Mtx *m);
+void guMtxL2F(float mf[4][4], const Mtx *m);
 void guNormalize(float *, float *, float *);
 
 /* Used only in Fast3DEX2 */

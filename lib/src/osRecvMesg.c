@@ -1,3 +1,8 @@
+#ifdef __EMSCRIPTEN__
+#include <stdio.h>
+#include <emscripten.h>
+#endif
+
 #include "libultra_internal.h"
 
 extern OSThread *D_803348A0;
@@ -7,6 +12,20 @@ s32 osRecvMesg(OSMesgQueue *mq, OSMesg *msg, s32 flag) {
     register OSThread *thread;
     int_disabled = __osDisableInt();
 
+#ifdef __EMSCRIPTEN__
+    // printf("receiving message from queue %p\n", mq);
+    if (!mq->validCount) {
+        if (flag) {
+            printf("Error: Blocked with no messages in queue %p. Please rework the code.\n", mq);
+            EM_ASM(
+                console.warn(new Error().stack);
+            );
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+#else
     while (!mq->validCount) {
         if (!flag) {
             __osRestoreInt(int_disabled);
@@ -15,6 +34,7 @@ s32 osRecvMesg(OSMesgQueue *mq, OSMesg *msg, s32 flag) {
         D_803348A0->state = OS_STATE_WAITING;
         __osEnqueueAndYield(&mq->mtqueue);
     }
+#endif
 
     if (msg != NULL) {
         *msg = *(mq->first + mq->msg);

@@ -13,7 +13,10 @@ void __osViSwapContext() {
     field = 0;
     s1 = D_80334914;
     s0 = s1->unk08;
+#ifdef __EMSCRIPTEN__
+#else
     field = HW_REG(VI_V_CURRENT_LINE_REG, u32) & 1;
+#endif
     s2 = osVirtualToPhysical(s1->buffer);
     origin = (s0->fldRegs[field].origin) + s2;
     if (s1->unk00 & 2) {
@@ -40,6 +43,8 @@ void __osViSwapContext() {
         s1->unk2c = (s1->unk28 << 0x10) & 0x3ff0000;
         origin = osVirtualToPhysical(s1->buffer);
     }
+#ifdef __EMSCRIPTEN__
+#else
     HW_REG(VI_ORIGIN_REG, u32) = origin;
     HW_REG(VI_WIDTH_REG, u32) = s0->comRegs.width;
     HW_REG(VI_BURST_REG, u32) = s0->comRegs.burst;
@@ -53,6 +58,7 @@ void __osViSwapContext() {
     HW_REG(VI_X_SCALE_REG, u32) = s1->unk20;
     HW_REG(VI_Y_SCALE_REG, u32) = s1->unk2c;
     HW_REG(VI_CONTROL_REG, u32) = s1->features;
+#endif
     D_80334914 = D_80334910;
     D_80334910 = s1;
     *D_80334914 = *D_80334910;

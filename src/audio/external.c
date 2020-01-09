@@ -1,3 +1,7 @@
+#ifdef __EMSCRIPTEN__
+#include <stdio.h>
+#endif
+
 #include <ultra64.h>
 #include "sm64.h"
 #include "memory.h"
@@ -1614,6 +1618,9 @@ GLOBAL_ASM("asm/non_matchings/eu/play_sequence.s")
 #else
 
 void play_sequence(u8 player, u8 seqId, u16 fadeTimer) {
+#ifdef __EMSCRIPTEN
+    return;
+#endif
     u8 temp_ret;
     u8 i;
 
@@ -2071,6 +2078,7 @@ static void func_803207DC(u8 bankIndex) {
     u8 item = gSoundBanks[bankIndex][0].next;
 
     while (item != 0xff) {
+        printf("item %d\n", (int)item); // FIXME: stuck on item 0
         func_8031E0E4(bankIndex, item);
         gSoundBanks[bankIndex][item].soundBits = NO_SOUND;
         item = gSoundBanks[bankIndex][item].next;
@@ -2151,6 +2159,9 @@ void play_dialog_sound(u8 dialogID) {
 }
 
 void play_music(u8 player, u16 seqArgs, u16 fadeTimer) {
+#ifdef __EMSCRIPTEN__
+    return;
+#endif
     u8 seqId = seqArgs & 0xff;
     u8 priority = seqArgs >> 8;
     u8 i;
@@ -2431,6 +2442,9 @@ void play_toads_jingle(void) {
 }
 
 void sound_reset(u8 presetId) {
+#ifdef __EMSCRIPTEN__
+    return;
+#endif
 #ifndef VERSION_JP
     if (presetId >= 8) {
         presetId = 0;

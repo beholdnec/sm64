@@ -37,6 +37,8 @@ typedef s32 intptr_t;
 typedef s32 ptrdiff_t;
 #else
 #include <stddef.h>
+#include <stdint.h>
+typedef long ssize_t; // XXX: this exists to fix duplicate ssize_t definitions in Emscripten-- however, this may be the wrong type
 #endif
 
 #endif

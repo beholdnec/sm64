@@ -1,3 +1,8 @@
+#ifdef __EMSCRIPTEN__
+#include <stdio.h>
+#include <emscripten.h>
+#endif
+
 #include "libultra_internal.h"
 
 extern OSThread *D_803348A0;
@@ -7,6 +12,17 @@ s32 osSendMesg(OSMesgQueue *mq, OSMesg msg, s32 flag) {
     register s32 index;
     register OSThread *s2;
     int_disabled = __osDisableInt();
+
+#ifdef __EMSCRIPTEN__
+    // printf("sending message %p to queue %p\n", msg, mq);
+    if (flag) {
+        printf("Error: Blocked sending messages in queue %p. Please rework the code.\n", mq);
+        EM_ASM(
+            console.warn(new Error().stack);
+        );
+        return 0;
+    }
+#endif
 
     while (mq->validCount >= mq->msgCount) {
         if (flag == OS_MESG_BLOCK) {

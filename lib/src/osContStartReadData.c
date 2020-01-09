@@ -29,6 +29,8 @@ s32 osContStartReadData(OSMesgQueue *mesg) {
     __osSiRelAccess();
     return ret;
 }
+#ifdef __EMSCRIPTEN__
+#else
 void osContGetReadData(OSContPad *pad) {
     OSContPackedRead *spc;
     OSContPackedRead sp4;
@@ -44,6 +46,7 @@ void osContGetReadData(OSContPad *pad) {
         }
     };
 }
+#endif
 void __osPackReadData() {
     OSContPackedRead *spc;
     OSContPackedRead sp4;

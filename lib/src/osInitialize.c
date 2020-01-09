@@ -2,7 +2,10 @@
 #include "hardware.h"
 #include <macros.h>
 
+#ifdef __EMSCRIPTEN__
+#else
 #define PIF_ADDR_START (void *) 0x1FC007FC
+#endif
 
 typedef struct {
     u32 instr00;
@@ -19,7 +22,7 @@ extern void D_802F4380();
 u32 D_80365CD0; // maybe initialized?
 u64 osClockRate = 62500000;
 u32 D_80334808 = 0;
-
+ 
 #ifdef VERSION_EU
 u32 EU_D_80336C40;
 u32 EU_D_80336C44;
@@ -29,13 +32,20 @@ u32 EU_D_80302090 = 0;
 u8 EU_unusedZeroes[8] = { 0 };
 #endif
 
+#ifdef __EMSCRIPTEN__
+#else
 #define EXCEPTION_TLB_MISS 0x80000000
 #define EXCEPTION_XTLB_MISS 0x80000080
 #define EXCEPTION_CACHE_ERROR 0x80000100
 #define EXCEPTION_GENERAL 0x80000180
+#endif
 
 extern u32 osResetType;
+#ifdef __EMSCRIPTEN__
+exceptionPreamble __osExceptionPreamble = { 0, 0, 0, 0 };
+#else
 extern exceptionPreamble __osExceptionPreamble;
+#endif
 
 void osInitialize(void) {
     u32 sp34;
@@ -49,6 +59,8 @@ void osInitialize(void) {
     D_80365CD0 = TRUE;
     __osSetSR(__osGetSR() | 0x20000000);
     __osSetFpcCsr(0x01000800);
+#ifdef __EMSCRIPTEN__
+#else
     while (__osSiRawReadIo(PIF_ADDR_START, &sp34)) {
         ;
     }
@@ -63,6 +75,7 @@ void osInitialize(void) {
                       EXCEPTION_GENERAL + sizeof(exceptionPreamble) - EXCEPTION_TLB_MISS);
     osInvalICache((void *) 0x80000000,
                   EXCEPTION_GENERAL + sizeof(exceptionPreamble) - EXCEPTION_TLB_MISS);
+#endif
     osMapTLBRdb();
     osPiRawReadIo(4, &sp30);
     sp30 &= ~0xf;

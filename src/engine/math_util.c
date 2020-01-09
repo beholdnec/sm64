@@ -143,10 +143,10 @@ void *vec3f_normalize(Vec3f dest) {
 #pragma GCC diagnostic pop
 
 /// Copy matrix 'src' to 'dest'
-void mtxf_copy(Mat4 dest, Mat4 src) {
+void mtxf_copy(Mat4 dest, const Mat4 src) {
     register s32 i;
     register u32 *d = (u32 *) dest;
-    register u32 *s = (u32 *) src;
+    register u32 *s = (const u32 *) src;
 
     for (i = 0; i < 16; i++) {
         *d++ = *s++;

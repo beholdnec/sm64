@@ -1,3 +1,7 @@
+#ifdef __EMSCRIPTEN__
+#include <stdio.h>
+#endif
+
 #include <ultra64.h>
 
 #include "sm64.h"
@@ -807,6 +811,8 @@ struct LevelCommand *level_script_execute(struct LevelCommand *cmd) {
     sCurrentCmd = cmd;
 
     while (sScriptStatus == SCRIPT_RUNNING) {
+        //printf("sCurrentCmd: %p\n", sCurrentCmd);
+        //printf("sCurrentCmd->type: %d\n", (int)sCurrentCmd->type);
         LevelScriptJumpTable[sCurrentCmd->type]();
     }
 

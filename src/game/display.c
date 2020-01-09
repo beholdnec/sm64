@@ -12,7 +12,7 @@
 
 int unused8032C690 = 0;
 u32 gGlobalTimer = 0;
-static u16 sCurrFBNum = 0;
+u16 sCurrFBNum = 0;
 u16 frameBufferIndex = 0;
 
 /**

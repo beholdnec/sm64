@@ -609,6 +609,9 @@ s32 func_eu_802E2AA0(void) {
  * Waits until a specified number of audio frames have been created
  */
 void wait_for_audio_frames(s32 frames) {
+#ifdef __EMSCRIPTEN__
+    return;
+#endif
     gAudioFrameCount = 0;
     // Sound thread will update gAudioFrameCount
     while (gAudioFrameCount < frames) {
